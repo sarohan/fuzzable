@@ -1,5 +1,5 @@
 ailment==9.2.26; python_version >= "3.8"
-angr==9.2.26; python_version >= "3.8"
+angr==9.2.196; python_version >= "3.8"
 archinfo==9.2.26; python_version >= "3.8"
 bitstring==4.0.1; python_version >= "3.8"
 cachetools==5.2.0; python_version >= "3.8" and python_version < "4.0"
