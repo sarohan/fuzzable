@@ -207,15 +207,15 @@ def run_on_file(
                 headless=True,
             )
 
-        # didn't work, try to load angr as a fallback instead
+        # didn't work, try to load Ghidra as a fallback
         except (RuntimeError, ModuleNotFoundError, ImportError):
             log.warning(
-                f"Cannot load Binary Ninja as a backend. Attempting to load angr instead."
+                f"Cannot load Binary Ninja as a backend. Attempting to load Ghidra instead."
             )
             try:
-                from fuzzable.analysis.angr import AngrAnalysis
+                from fuzzable.analysis.ghidra import GhidraAnalysis
 
-                analyzer = AngrAnalysis(
+                analyzer = GhidraAnalysis(
                     target,
                     include_sym=include_sym,
                     include_nontop=include_nontop,
@@ -223,8 +223,25 @@ def run_on_file(
                     skip_stripped=skip_stripped,
                     score_weights=score_weights,
                 )
-            except ModuleNotFoundError as err:
-                error(f"Unsupported target {target}. Reason: {err}")
+
+            # Ghidra didn't work, try angr as final fallback
+            except (RuntimeError, ModuleNotFoundError, ImportError, OSError) as e:
+                log.warning(
+                    f"Cannot load Ghidra as a backend: {e}. Attempting to load angr instead."
+                )
+                try:
+                    from fuzzable.analysis.angr import AngrAnalysis
+
+                    analyzer = AngrAnalysis(
+                        target,
+                        include_sym=include_sym,
+                        include_nontop=include_nontop,
+                        skip_sym=skip_sym,
+                        skip_stripped=skip_stripped,
+                        score_weights=score_weights,
+                    )
+                except ModuleNotFoundError as err:
+                    error(f"Unsupported target {target}. Reason: {err}")
 
     log.info(f"Running fuzzable analysis with the {str(analyzer)} analyzer")
     results = analyzer.run()

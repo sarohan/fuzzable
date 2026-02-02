@@ -7,3 +7,6 @@
 [submodule "examples/source/libyaml"]
 	path = examples/source/libyaml
 	url = https://github.com/yaml/libyaml
+[submodule "third_party/pyhidra"]
+	path = third_party/pyhidra
+	url = https://github.com/dod-cyber-crime-center/pyhidra.git
