@@ -20,26 +20,23 @@ Check out the original blog post detailing the tool [here](https://codemuch.tech
 
 ## Features
 
-* Supports analyzing __binaries__ (with [Angr](https://angr.io) and [Binary Ninja](https://binary.ninja)) and
+* Supports analyzing __binaries__ (with [Binary Ninja](https://binary.ninja), [Ghidra](https://ghidra-sre.org/), or [Angr](https://angr.io)) and
 __source code__ artifacts (with [tree-sitter](https://tree-sitter.github.io/tree-sitter/)).
 * Run static analysis both as a __standalone CLI tool__ or a __Binary Ninja plugin__.
 * __Harness generation__ to ramp up on creating fuzzing campaigns quickly.
 
 ## Installation
 
-Some binary targets may require some sanitizing (ie. signature matching, or identifying functions from inlining), and therefore 
+Some binary targets may require some sanitizing (ie. signature matching, or identifying functions from inlining), and therefore
 __fuzzable__ primarily uses Binary Ninja as a disassembly backend because of it's ability to effectively solve these problems. Therefore, it can be utilized both as a standalone tool and plugin.
 
-Since Binary Ninja isn't accessible to all and there may be a demand to utilize for security assessments and potentially scaling up in the cloud, an [angr](https://github.com/angr/angr)
-_fallback_ backend is also supported. I anticipate to incorporate other disassemblers down the road as well (priority: Ghidra).
+Since Binary Ninja isn't accessible to all and there may be a demand to utilize for security assessments and potentially scaling up in the cloud, __fuzzable__ supports multiple disassembly backends with the following priority order:
+
+1. **Binary Ninja** - Commercial tool with excellent analysis capabilities
+2. **Ghidra** - Free and open-source, via [pyhidra](https://github.com/dod-cyber-crime-center/pyhidra)
+3. **angr** - Open-source fallback backend
 
 ### Command Line (Standalone)
-
-If you have Binary Ninja Commercial, be sure to install the API for standalone headless usage:
-
-```
-$ python3 /Applications/Binary\ Ninja.app/Contents/Resources/scripts/install_api.py
-```
 
 Install with `pip`:
 
@@ -47,9 +44,39 @@ Install with `pip`:
 $ pip install fuzzable
 ```
 
+Or with [uv](https://docs.astral.sh/uv/):
+
+```
+$ uv add fuzzable
+```
+
+#### Backend Setup
+
+**Binary Ninja** (optional): If you have Binary Ninja Commercial, install the API for standalone headless usage:
+
+```
+$ python3 /Applications/Binary\ Ninja.app/Contents/Resources/scripts/install_api.py
+```
+
+**Ghidra** (optional): To use the Ghidra backend, you need to:
+
+1. Install [Ghidra](https://ghidra-sre.org/) and set the `GHIDRA_INSTALL_DIR` environment variable:
+   ```
+   $ export GHIDRA_INSTALL_DIR=/path/to/ghidra
+   ```
+
+2. Install fuzzable with Ghidra support:
+   ```
+   $ pip install fuzzable[ghidra]
+   # or with uv
+   $ uv add fuzzable[ghidra]
+   ```
+
+If neither Binary Ninja nor Ghidra are available, __fuzzable__ will automatically fall back to using angr.
+
 ### Manual/Development Build
 
-We use [poetry](https://python-poetry.org) for dependency management and building. To do a manual build, clone the repository with the third-party modules:
+We use [uv](https://docs.astral.sh/uv/) for dependency management and building. To do a manual build, clone the repository with the third-party modules:
 
 ```
 $ git clone --recursive https://github.com/ex0dus-0x/fuzzable
@@ -60,14 +87,17 @@ To install manually:
 ```
 $ cd fuzzable/
 
-# without poetry
-$ pip install .
+# with uv (recommended)
+$ uv sync
 
-# with poetry
-$ poetry install
+# with uv and Ghidra support
+$ uv sync --extra ghidra
 
-# with poetry for a development virtualenv
-$ poetry shell
+# or with pip
+$ pip install -e .
+
+# or with pip and Ghidra support
+$ pip install -e ".[ghidra]"
 ```
 
 You can now analyze binaries and/or source code with the tool!
